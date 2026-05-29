@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbum Online - Copa do Mundo 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="text-slate-100 min-h-screen flex flex-col justify-between relative bg-[#05050b]">
+
+    <div class="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-15vw] left-[-15vw] w-[50vw] h-[50vw] rounded-full filter blur-[130px] ambient-glow-1"></div>
+        <div class="absolute bottom-[-20vw] right-[-20vw] w-[55vw] h-[55vw] rounded-full filter blur-[130px] ambient-glow-2"></div>
+    </div>
+
+    <svg class="fixed inset-0 -z-10 w-full h-full pointer-events-none opacity-[0.02] invert select-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="logo2026-pattern" x="0" y="0" width="100" height="155" patternUnits="userSpaceOnUse" viewBox="-20 -20 1000 1550">
+                <g transform="translate(0.000000,1482.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none">
+                    <path d="M2165 14809 c-155 -15 -354 -58 -523 -115 -762 -253 -1338 -861
+                    -1556 -1639 -47 -169 -86 -428 -86 -576 l0 -59 1128 -1 c688 -1 1092 -5 1037
+                    -10 -254 -24 -579 -117 -819 -234 -232 -113 -504 -310 -672 -487 -381 -402
+                    -610 -901 -664 -1447 -6 -64 -10 -582 -10 -1362 l0 -1259 4800 0 4800 0 0
+                    1200 0 1200 -1127 1 c-694 1 -1093 5 -1038 10 381 36 761 172 1087 388 466
+                    309 794 745 967 1284 306 957 -37 2026 -844 2632 -365 274 -776 433 -1230 475
+                    -135 12 -5116 11 -5250 -1z"/>
+                    <path d="M2187 7200 c-712 -65 -1362 -447 -1769 -1040 -230 -335 -373 -737
+                    -408 -1145 -8 -90 -10 -545 -8 -1490 4 -1503 1 -1413 70 -1695 209 -850 880
+                    -1527 1732 -1745 297 -76 50 -70 2996 -70 2946 0 2699 -6 2996 70 761 195
+                    1392 766 1657 1500 375 1039 7 2182 -903 2807 -334 229 -719 366 -1160 411
+                    -19 2 471 5 1089 5 l1124 2 -7 123 c-30 540 -231 1036 -584 1447 -325 378
+                    -772 649 -1257 763 -281 66 -51 61 -2900 63 -1419 1 -2620 -2 -2668 -6z"/>
+                </g>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#logo2026-pattern)" />
+    </svg>
+
+    <header class="bg-slate-950/60 border-b border-slate-900 px-4 py-6 md:py-8 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <img src="SuperGeeks_LogoHorizontal_Branco.png" alt="SuperGeeks Logo" class="h-10 md:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,30,86,0.3)]">
+                    <span class="text-xs md:text-sm font-bold tracking-wider text-slate-400 border-l border-slate-800 pl-3 uppercase">
+                        Unidade Campo Belo
+                    </span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-copa tracking-tighter uppercase leading-none text-white">
+                    COMPLETANDO ÁLBUM <br><span class="copa-gradient-red">COPA 2026</span>
+                </h1>
+                <p class="text-slate-400 max-w-xl text-xs md:text-sm">
+                    Acompanhe em tempo real as figurinhas que faltam, obtidas e até mesmo as repetidas. Nos ajude a completar o nosso álbum oficial dos três países sedes!
+                </p>
+            </div>
+
+            <div class="w-full lg:w-96 flex flex-col gap-3 items-end justify-end">
+                
+                <div class="flex items-center justify-between w-full gap-2 md:gap-3">
+                    <div class="flex-1 flex justify-center items-center bg-slate-900 border border-slate-800 rounded-xl text-[10px] md:text-xs font-bold tracking-wider text-[#ff1e56] uppercase whitespace-nowrap h-9 px-2">
+                        <span class="w-2 h-2 rounded-full bg-[#ff1e56] animate-ping mr-2"></span> online
+                    </div>
+                    <button onclick="openModal('regras-modal')"
+                        class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-[#ff1e56] text-slate-300 hover:text-white font-bold rounded-xl transition text-[10px] md:text-xs cursor-pointer whitespace-nowrap h-9 flex items-center justify-center px-2">
+                        📜 Regras
+                    </button>
+                    <div class="flex-1">
+                        <div id="admin-badge" class="hidden bg-red-950/40 border border-red-500 text-red-400 rounded-xl text-[10px] md:text-xs font-bold flex items-center justify-center h-9 w-full">
+                            <button onclick="logout()" class="text-white hover:text-red-400 underline cursor-pointer">Sair</button>
+                        </div>
+                        <button id="login-trigger-btn" onclick="openModal('login-modal')"
+                            class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-[#ff1e56] text-white font-bold rounded-xl transition text-[10px] md:text-xs cursor-pointer whitespace-nowrap h-9 flex items-center justify-center">
+                            🔑 Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs uppercase font-extrabold tracking-wider text-slate-400">Progresso Geral:</span>
+                        <span class="text-xs font-bold text-slate-300">
+                            <span id="stats-owned" class="text-[#ff1e56]">0</span> / <span id="stats-total">994</span>
+                            <span class="text-slate-600 mx-1">|</span>
+                            <span id="stats-repeated" class="text-amber-400">0</span> Repetidas
+                        </span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-6 rounded-lg overflow-hidden p-[2px] relative flex items-center justify-center border border-slate-800">
+                        <div id="progress-bar" class="h-full rounded-md bg-gradient-to-r from-[#ff1e56] to-[#80001c] transition-all duration-500 absolute left-[2px]" style="width: 0%"></div>
+                        <span id="progress-percentage" class="text-[11px] font-copa text-white relative z-10">0%</span>
+                    </div>
+                </div>
+
+                <div class="w-full flex gap-3">
+                    <div class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-2 flex flex-col items-center justify-center shadow-lg">
+                        <span class="text-[9px] uppercase font-extrabold tracking-wider text-slate-500 mb-1.5">A Copa começa em</span>
+                        <div class="flex items-center gap-1.5 font-mono text-[#ff1e56] font-bold">
+                            <div class="flex flex-col items-center"><span id="wc-days" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">DIAS</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="wc-hours" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">HRS</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="wc-mins" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">MIN</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="wc-secs" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">SEG</span></div>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-2 flex flex-col items-center justify-center shadow-lg">
+                        <span class="text-[9px] uppercase font-extrabold tracking-wider text-slate-500 mb-1.5">Fim da Campanha</span>
+                        <div class="flex items-center gap-1.5 font-mono text-amber-400 font-bold">
+                            <div class="flex flex-col items-center"><span id="camp-days" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">DIAS</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="camp-hours" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">HRS</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="camp-mins" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">MIN</span></div><span class="text-slate-700 pb-2">:</span>
+                            <div class="flex flex-col items-center"><span id="camp-secs" class="text-sm leading-none">00</span><span class="text-[6px] text-slate-500 mt-0.5">SEG</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto w-full px-4 mt-6">
+        <div class="bg-slate-900/40 border border-slate-900 rounded-xl p-4 flex flex-col xl:flex-row gap-5 items-start xl:items-center justify-between">
+            <h2 class="text-md font-copa text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 uppercase tracking-tight whitespace-nowrap">
+                Visão geral Álbum
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full xl:flex-1 max-w-5xl items-center">
+                <div class="relative w-full">
+                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="🔍 Buscar por código ou seleção..."
+                        class="w-full bg-slate-950 border border-slate-800 rounded-lg text-xs px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#ff1e56] transition h-9">
+                </div>
+
+                <select id="group-select" onchange="changeGroup()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold px-3 py-2 text-slate-200 focus:outline-none focus:border-[#ff1e56] cursor-pointer h-9">
+                    <option value="all">Todos os Grupos</option>
+                    <option value="A">Grupo A</option>
+                    <option value="B">Grupo B</option>
+                    <option value="C">Grupo C</option>
+                    <option value="D">Grupo D</option>
+                    <option value="E">Grupo E</option>
+                    <option value="F">Grupo F</option>
+                    <option value="G">Grupo G</option>
+                    <option value="H">Grupo H</option>
+                    <option value="I">Grupo I</option>
+                    <option value="J">Grupo J</option>
+                    <option value="K">Grupo K</option>
+                    <option value="L">Grupo L</option>
+                    <option value="especial">Especiais (História/Coca)</option>
+                </select>
+
+                <select id="category-select" onchange="changeCategory()"
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold px-3 py-2 text-slate-200 focus:outline-none focus:border-[#ff1e56] cursor-pointer h-9">
+                    <option value="all">Todas as Seleções</option>
+                    <option value="FWC">História da Copa (00 - FWC19)</option>
+                    <optgroup label="Seleções Oficiais">
+                        <option value="MEX">México</option>
+                        <option value="RSA">África do Sul</option>
+                        <option value="KOR">Coreia do Sul</option>
+                        <option value="CZE">Rep. Tcheca</option>
+                        <option value="CAN">Canadá</option>
+                        <option value="BIH">Bósnia</option>
+                        <option value="QAT">Catar</option>
+                        <option value="SUI">Suíça</option>
+                        <option value="BRA">Brasil</option>
+                        <option value="MAR">Marrocos</option>
+                        <option value="HAI">Haiti</option>
+                        <option value="SCO">Escócia</option>
+                        <option value="USA">Estados Unidos</option>
+                        <option value="PAR">Paraguai</option>
+                        <option value="AUS">Austrália</option>
+                        <option value="TUR">Turquia</option>
+                        <option value="GER">Alemanha</option>
+                        <option value="CUW">Curaçao</option>
+                        <option value="CIV">Costa do Marfim</option>
+                        <option value="ECU">Equador</option>
+                        <option value="NED">Holanda</option>
+                        <option value="JPN">Japão</option>
+                        <option value="SWE">Suécia</option>
+                        <option value="TUN">Tunísia</option>
+                        <option value="BEL">Bélgica</option>
+                        <option value="EGY">Egito</option>
+                        <option value="IRN">Irã</option>
+                        <option value="NZL">Nova Zelândia</option>
+                        <option value="ESP">Espanha</option>
+                        <option value="CPV">Cabo Verde</option>
+                        <option value="KSA">Arábia Saudita</option>
+                        <option value="URU">Uruguai</option>
+                        <option value="FRA">França</option>
+                        <option value="SEN">Senegal</option>
+                        <option value="IRQ">Iraque</option>
+                        <option value="NOR">Noruega</option>
+                        <option value="ARG">Argentina</option>
+                        <option value="ALG">Argélia</option>
+                        <option value="AUT">Áustria</option>
+                        <option value="JOR">Jordânia</option>
+                        <option value="POR">Portugal</option>
+                        <option value="COD">Congo</option>
+                        <option value="UZB">Uzbequistão</option>
+                        <option value="COL">Colômbia</option>
+                        <option value="ENG">Inglaterra</option>
+                        <option value="CRO">Croácia</option>
+                        <option value="GHA">Gana</option>
+                        <option value="PAN">Panamá</option>
+                    </optgroup>
+                    <option value="CC">Coca-Cola (CC1 - CC14)</option>
+                </select>
+
+                <div class="bg-slate-950 p-1 rounded-lg border border-slate-800 flex gap-1 w-full justify-center h-9 items-center">
+                    <button onclick="filterStickers('all', event)" class="filter-btn active bg-[#ff1e56] text-slate-950 font-bold py-1 rounded-md text-[11px] uppercase cursor-pointer flex-1 h-full transition-colors">Todas</button>
+                    <button onclick="filterStickers('missing', event)" class="filter-btn text-slate-400 font-bold py-1 rounded-md text-[11px] uppercase cursor-pointer flex-1 h-full transition-colors">Faltam</button>
+                    <button onclick="filterStickers('owned', event)" class="filter-btn text-slate-400 font-bold py-1 rounded-md text-[11px] uppercase cursor-pointer flex-1 h-full transition-colors">Obtida</button>
+                    <button onclick="filterStickers('repeated', event)" class="filter-btn text-slate-400 font-bold py-1 rounded-md text-[11px] uppercase cursor-pointer flex-1 h-full text-amber-500/90 transition-colors">Repetida</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto w-full px-4 my-6 flex-grow">
+        <div id="admin-hint" class="hidden bg-red-950/20 border border-red-500 text-red-300 px-4 py-3 rounded-xl text-xs font-semibold mb-4 text-center">
+            💡 <strong>Modo Administrator Ativado:</strong> Clique no card para marcar/desmarcar posse. Use os botões internos de <span class="text-amber-400 font-bold">[-] [+]</span> para gerenciar as figurinhas repetidas de troca.
+        </div>
+
+        <div id="album-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12 gap-2"></div>
+
+        <div class="flex justify-center items-center gap-2 mt-8">
+            <button id="btn-first" onclick="navigatePage('first')" class="p-2 rounded bg-slate-900 border border-slate-800 hover:border-[#ff1e56] text-xs font-bold disabled:opacity-30 cursor-pointer">&lt;&lt;</button>
+            <button id="btn-prev" onclick="navigatePage('prev')" class="p-2 rounded bg-slate-900 border border-slate-800 hover:border-[#ff1e56] text-xs font-bold disabled:opacity-30 cursor-pointer">&lt;</button>
+            <span class="text-xs font-mono text-slate-400 px-4 bg-slate-950 py-2 rounded border border-slate-900">
+                Página <span id="current-page-num" class="text-[#ff1e56] font-bold">1</span> de <span id="total-pages-num">1</span>
+            </span>
+            <button id="btn-next" onclick="navigatePage('next')" class="p-2 rounded bg-slate-900 border border-slate-800 hover:border-[#ff1e56] text-xs font-bold disabled:opacity-30 cursor-pointer">&gt;</button>
+            <button id="btn-last" onclick="navigatePage('last')" class="p-2 rounded bg-slate-900 border border-slate-800 hover:border-[#ff1e56] text-xs font-bold disabled:opacity-30 cursor-pointer">&gt;&gt;</button>
+        </div>
+    </main>
+
+    <footer class="bg-slate-950/80 border-t border-slate-900 py-4 text-center text-[11px] text-slate-600">
+        <p>© 2026 - Álbum Digital Interativo Copa 2026 • SuperGeeks Campo Belo. Todos os direitos reservados.</p>
+    </footer>
+
+    <div id="regras-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="bg-gradient-to-r from-[#ff1e56] to-[#80001c] p-4 flex justify-between items-center text-white">
+                <h3 class="font-copa text-sm uppercase tracking-tight">📜 Regras da Campanha</h3>
+                <button onclick="closeModal('regras-modal')" class="font-bold text-xl hover:text-white cursor-pointer">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-slate-300 text-xs md:text-sm leading-relaxed">
+                <p class="font-bold text-white text-sm border-b border-slate-800 pb-2">Participe e complete seu álbum oficial da Copa 2026!</p>
+                <ul class="list-disc list-inside space-y-2 text-slate-400">
+                    <li><strong class="text-white">Como Funciona:</strong> Cadastre suas figurinhas obtidas e controle suas repetidas através do painel.</li>
+                    <li><strong class="text-white">Trocas na Unidade:</strong> Traga suas figurinhas repetidas físicas para a <span class="text-[#ff1e56] font-semibold">Unidade Campo Belo</span> para interagir, negociar com outros alunos e acelerar sua coleção.</li>
+                    <li><strong class="text-white">Controle de Inventário:</strong> Mantenha seu painel atualizado. O gráfico de progresso reflete em tempo real a proximidade de completar as 994 figurinhas.</li>
+                    <li><strong class="text-white">Modo Edição:</strong> Apenas administradores autorizados da unidade possuem a credencial para ativar o gerenciamento manual direto na interface.</li>
+                </ul>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] text-center text-slate-500">
+                    Dúvidas sobre o projeto? Procure a coordenação ou a secretaria da Unidade Campo Belo.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
+            <div class="bg-gradient-to-r from-[#ff1e56] to-[#80001c] p-4 flex justify-between items-center text-white">
+                <h3 class="font-copa text-sm uppercase tracking-tight">Painel do Proprietário</h3>
+                <button onclick="closeModal('login-modal')" class="font-bold text-xl hover:text-white cursor-pointer">&times;</button>
+            </div>
+            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Usuário</label>
+                    <input type="text" id="username" required placeholder="login" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff1e56]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Senha</label>
+                    <input type="password" id="password" required placeholder="senha" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff1e56]">
+                </div>
+                <div id="login-error" class="hidden text-xs text-red-400 font-semibold bg-red-950/50 p-2 rounded-lg border border-red-900">
+                    ❌ Usuário ou senha incorretos!
+                </div>
+                <button type="submit" class="w-full bg-[#ff1e56] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider hover:brightness-110 transition cursor-pointer">
+                    Liberar Edição
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
