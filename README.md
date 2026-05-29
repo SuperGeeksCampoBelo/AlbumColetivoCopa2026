@@ -6,7 +6,7 @@
 ![GitHub Pages](https://img.shields.io/badge/github%20pages-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
 ![AI-Powered](https://img.shields.io/badge/AI--Powered-Gemini-blue?style=for-the-badge&logo=google-gemini&logoColor=white)
 
-Este repositório contém o código-fonte da plataforma web desenvolvida para a campanha especial da **Copa do Mundo de 2026** na **SuperGeeks unidade Campo Belo**. O objetivo principal do projeto é centralizar e engajar os alunos no controle de inventário das figurinhas coletadas para o álbum oficial da escola.
+Este repositório contém o código-fonte da plataforma web desenvolvida para a campanha especial da **Copa do Mundo de 2026** na **SuperGeeks Campo Belo**. O objetivo principal do projeto é centralizar e engajar os alunos no controle de inventário das figurinhas coletadas para o álbum oficial da escola.
 
 ---
 
@@ -34,7 +34,7 @@ Para celebrar o ano de Copa do Mundo, a SuperGeeks Campo Belo lançou uma campan
 
 O grande diferencial técnico deste projeto é a sua esteira de produção. O site foi **desenvolvido 100% utilizando Inteligência Artificial (Google Gemini)**, atuando como um co-piloto e engenheiro de software principal, sob a supervisão técnica e direcionamento de produto da equipe SuperGeeks.
 
-Para garantir a qualidade, organização e velocidade na entrega, o desenvolvimento não foi feito em um único bloco de código, mas sim seguindo os ritos de **Metodologia Ágil através de Sprints**:
+Para garantir a qualidade, organização e velocidade na entrega, o desenvolvimento não foi feito em um único bloco de código, mas sim seguindo os ritos de **Metodologia Ágil**:
 
 ### 🏃‍♂️ Divisão das Sprints:
 1.  **Sprint 1 (Fundamentos & UI):** Planejamento da arquitetura estática, definição da identidade visual baseada no ecossistema SuperGeeks e estruturação do grid principal para mapear o grande volume de figurinhas.
