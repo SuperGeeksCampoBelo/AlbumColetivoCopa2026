@@ -429,7 +429,7 @@ function closeModal(id) {
 
 function handleLogin(event) {
     event.preventDefault();
-    if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'copa2026') {
+    if (document.getElementById('username').value === 'SGCB' && document.getElementById('password').value === 'SGcb#555') {
         sessionStorage.setItem('copa2026_logged_in', 'true');
         location.reload();
     } else {
