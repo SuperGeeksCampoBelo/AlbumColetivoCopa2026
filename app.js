@@ -1,7 +1,11 @@
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
-// Você pode alterar as datas e horas entre as aspas usando o formato "Mês Dia, Ano HH:MM:SS"
 const WORLD_CUP_DATE = new Date("June 11, 2026 00:00:00").getTime();
-const CAMPAIGN_END_DATE = new Date("August 01, 2026 23:59:59").getTime(); 
+const CAMPAIGN_END_DATE = new Date("August 03, 2026 23:59:59").getTime(); 
+
+// --- DADOS GLOBAIS DO ÁLBUM DA ESCOLA (FONTE DE VERDADE) ---
+// Quando você clicar no botão de exportar no painel, substitua as duas linhas abaixo pelo código gerado:
+const GLOBAL_OWNED_STICKERS = [1, 21, 161]; 
+const GLOBAL_REPEATED_STICKERS = {"161":2};
 
 const TOTAL_STICKERS = 994; // 20 FWC + (48 Seleções * 20) + 14 Coca-Cola
 const ITEMS_PER_PAGE = 48;
@@ -123,7 +127,7 @@ function generateStickersDatabase() {
 
 window.addEventListener('DOMContentLoaded', () => {
     generateStickersDatabase();
-    initLocalStorageState();
+    initGlobalState();
     checkLoginState();
     initCountdowns(); 
     renderAlbum();
@@ -138,11 +142,9 @@ function initCountdowns() {
 function updateCountdowns() {
     const now = new Date().getTime();
 
-    // Calcula tempo para a Copa
     const wcDistance = WORLD_CUP_DATE - now;
     renderTimer('wc', wcDistance);
 
-    // Calcula tempo para o fim da Campanha
     const campDistance = CAMPAIGN_END_DATE - now;
     renderTimer('camp', campDistance);
 }
@@ -166,35 +168,33 @@ function renderTimer(prefix, distance) {
     document.getElementById(`${prefix}-mins`).innerText = String(minutes).padStart(2, '0');
     document.getElementById(`${prefix}-secs`).innerText = String(seconds).padStart(2, '0');
 }
-// -----------------------------
 
-function initLocalStorageState() {
-    const savedStickers = localStorage.getItem('copa2026_album_stickers_994');
-    const savedRepeated = localStorage.getItem('copa2026_album_repeated_994');
+function initGlobalState() {
+    stickersState = {};
+    stickersRepeatedState = {};
+    
+    // Reseta o estado local estrutural baseado no tamanho do álbum
+    stickersList.forEach(s => {
+        stickersState[s.id] = false;
+        stickersRepeatedState[s.id] = 0;
+    });
 
-    if (savedStickers && savedRepeated) {
-        stickersState = JSON.parse(savedStickers);
-        stickersRepeatedState = JSON.parse(savedRepeated);
-    } else {
-        stickersState = {};
-        stickersRepeatedState = {};
-        stickersList.forEach(s => {
-            stickersState[s.id] = false;
-            stickersRepeatedState[s.id] = 0;
-        });
+    // Injeta os dados estáticos declarados nas constantes de topo
+    GLOBAL_OWNED_STICKERS.forEach(id => {
+        if(stickersState[id] !== undefined) stickersState[id] = true;
+    });
 
-        // Mocks iniciais de demonstração
-        stickersState[1] = true;
-        stickersState[21] = true;
-        stickersState[161] = true; stickersRepeatedState[161] = 2;
-        saveState();
-    }
+    Object.keys(GLOBAL_REPEATED_STICKERS).forEach(id => {
+        if(stickersRepeatedState[id] !== undefined) {
+            stickersRepeatedState[id] = GLOBAL_REPEATED_STICKERS[id];
+        }
+    });
+
     updateDashboard();
 }
 
 function saveState() {
-    localStorage.setItem('copa2026_album_stickers_994', JSON.stringify(stickersState));
-    localStorage.setItem('copa2026_album_repeated_994', JSON.stringify(stickersRepeatedState));
+    // Atualiza os componentes gráficos em tempo de execução na máquina do administrador
     updateDashboard();
 }
 
@@ -402,12 +402,44 @@ function checkLoginState() {
     if (sessionStorage.getItem('copa2026_logged_in') === 'true') {
         isAdmin = true;
         document.getElementById('admin-badge').classList.remove('hidden');
-        
-        // NOVIDADE AQUI: Ocultamos ativamente o botão de Login
         document.getElementById('login-trigger-btn').classList.add('hidden');
-        
         document.getElementById('admin-hint').classList.remove('hidden');
+
+        // Injeção dinâmica do botão de exportação estrutural para o ecossistema do GitHub Pages
+        if (!document.getElementById('btn-export-github')) {
+            const hintDiv = document.getElementById('admin-hint');
+            const containerBtn = document.createElement('div');
+            containerBtn.className = "mt-3";
+            containerBtn.innerHTML = `
+                <button id="btn-export-github" onclick="exportGitHubData()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2 px-5 rounded-xl text-xs uppercase tracking-wider cursor-pointer transition shadow-lg">
+                    📦 Gerar Código para Atualizar o GitHub
+                </button>
+            `;
+            hintDiv.appendChild(containerBtn);
+        }
     }
+}
+
+function exportGitHubData() {
+    const ownedIds = [];
+    const repeatedMap = {};
+
+    stickersList.forEach(s => {
+        if (stickersState[s.id]) {
+            ownedIds.push(s.id);
+        }
+        if ((stickersRepeatedState[s.id] || 0) > 0) {
+            repeatedMap[s.id] = stickersRepeatedState[s.id];
+        }
+    });
+
+    const generatedCode = `const GLOBAL_OWNED_STICKERS = ${JSON.stringify(ownedIds)};\nconst GLOBAL_REPEATED_STICKERS = ${JSON.stringify(repeatedMap)};`;
+    
+    navigator.clipboard.writeText(generatedCode).then(() => {
+        alert("Sucesso! As novas linhas de dados foram copiadas para sua Área de Transferência.\n\nAgora vá no seu arquivo 'app.js', substitua as linhas 7 e 8 por esse bloco copiado e faça o commit para o GitHub!");
+    }).catch(() => {
+        alert("Não foi possível copiar automaticamente. Copie o código abaixo manualmente:\n\n" + generatedCode);
+    });
 }
 
 function logout() {
@@ -429,7 +461,7 @@ function closeModal(id) {
 
 function handleLogin(event) {
     event.preventDefault();
-    if (document.getElementById('username').value === 'SGCB' && document.getElementById('password').value === 'SGcb#555') {
+    if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'copa2026') {
         sessionStorage.setItem('copa2026_logged_in', 'true');
         location.reload();
     } else {
