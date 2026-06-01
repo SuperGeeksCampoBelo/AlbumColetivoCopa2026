@@ -76,7 +76,7 @@ function generateStickersDatabase() {
             let code = "";
             let name = "";
             let isSpecial = false;
-            let bgGradient = "from-slate-900 to-slate-950";
+            let bgGradient = "from-slate-900 to-slate-950"; // Fundo sólido padrão para a maioria
 
             if (sec.id === "FWC") {
                 if (j === 1) {
@@ -87,7 +87,7 @@ function generateStickersDatabase() {
                     code = `FWC${j - 1}`;
                     name = `História da Copa #${j - 1}`;
                 }
-                bgGradient = "from-red-950/40 to-slate-950";
+                bgGradient = "from-red-950 to-slate-950"; // Removido o /40 (Agora sólido)
             } else if (sec.id === "CC") {
                 code = `CC${j}`;
                 name = `Coca-Cola Especial #${j}`;
@@ -102,9 +102,13 @@ function generateStickersDatabase() {
                     name = `${sec.name} - Jogador nº ${j}`;
                 }
 
-                if (sec.id === "BRA") bgGradient = "from-yellow-950/40 to-slate-950";
-                else if (sec.id === "ARG") bgGradient = "from-sky-950/40 to-slate-950";
-                else if (["MEX", "USA", "CAN"].includes(sec.id)) bgGradient = "from-red-950/30 to-slate-950";
+                // Ajustado os fundos abaixo tirando as barras (/40 e /30) para ficarem 100% sólidos
+                if (sec.id === "BRA") bgGradient = "from-yellow-950 to-slate-950";
+                else if (sec.id === "ARG") bgGradient = "from-sky-900/60 to-slate-950"; // Um tom de azul mais vivo e sólido
+                else if (["MEX", "USA", "CAN"].includes(sec.id)) bgGradient = "from-red-900/40 to-slate-950"; 
+                
+                // Nota: Se mesmo sem a barra você achar que o '950' puro fica escuro demais, 
+                // você pode usar tons como 'from-yellow-900', 'from-emerald-950', etc.
             }
 
             stickersList.push({
@@ -120,7 +124,6 @@ function generateStickersDatabase() {
         }
     });
 }
-
 window.addEventListener('DOMContentLoaded', async () => {
     generateStickersDatabase();
     initCountdowns(); 
