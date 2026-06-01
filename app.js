@@ -76,7 +76,10 @@ function generateStickersDatabase() {
             let code = "";
             let name = "";
             let isSpecial = false;
-            let bgGradient = "from-slate-900 to-slate-950"; // Fundo sólido padrão estável
+            
+            // LÓGICA DA SUÍÇA APLICADA A TODOS: 
+            // Todas as figurinhas agora usam estritamente o mesmo degradê sólido e limpo!
+            let bgGradient = "from-slate-900 to-slate-950"; 
 
             if (sec.id === "FWC") {
                 if (j === 1) {
@@ -87,12 +90,10 @@ function generateStickersDatabase() {
                     code = `FWC${j - 1}`;
                     name = `História da Copa #${j - 1}`;
                 }
-                bgGradient = "from-red-950 to-slate-950"; 
             } else if (sec.id === "CC") {
                 code = `CC${j}`;
                 name = `Coca-Cola Especial #${j}`;
                 isSpecial = true;
-                bgGradient = "from-red-900 to-slate-950";
             } else {
                 code = `${sec.prefix}${j}`;
                 if (j === 1) {
@@ -101,12 +102,6 @@ function generateStickersDatabase() {
                 } else {
                     name = `${sec.name} - Jogador nº ${j}`;
                 }
-
-                // FIX DEFINITIVO: Removido 100% de opacidades /40 ou /60 do Tailwind. 
-                // Agora os fundos abaixo usam cores puras e sólidas!
-                if (sec.id === "BRA") bgGradient = "from-yellow-950 to-slate-950";
-                else if (sec.id === "ARG") bgGradient = "from-sky-950 to-slate-950"; 
-                else if (["MEX", "USA", "CAN"].includes(sec.id)) bgGradient = "from-red-950 to-slate-950"; 
             }
 
             stickersList.push({
@@ -209,6 +204,7 @@ function updateDashboard() {
     if(document.getElementById('progress-bar')) document.getElementById('progress-bar').style.width = `${pct}%`;
 }
 
+// --- PESQUISA E FILTROS ---
 function handleSearch() {
     currentPage = 1;
     renderAlbum();
