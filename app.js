@@ -375,3 +375,22 @@ function closeModal(id) {
     modal.classList.add('opacity-0');
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
+
+// ==========================================
+// EFEITO PISCANTE DO FAVICON (SINAL ONLINE)
+// ==========================================
+(function() {
+    const favicon = document.getElementById('favicon');
+    if (!favicon) return;
+
+    // Estado 1: Bolinha Vermelha Neon acesa
+    const iconOn = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ff1e56'/></svg>";
+    
+    // Estado 2: Bolinha Transparente (apagada)
+    const iconOff = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='transparent'/></svg>";
+
+    // Alterna entre os dois estados a cada 1000ms (1 segundo)
+    setInterval(() => {
+        favicon.href = favicon.href === iconOn ? iconOff : iconOn;
+    }, 1000);
+})();
