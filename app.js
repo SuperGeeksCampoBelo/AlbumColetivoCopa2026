@@ -1,5 +1,4 @@
 // --- CONFIGURAÇÃO DA API DO GOOGLE APPS SCRIPT ---
-// Substitua o link abaixo pela "URL do app da Web" que você copiou ao implantar o script do Apps Script
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1RDggPtYo-HPAr8xN60lWjZn45y1paO2xUmug29qBayyib9tpEoPw0XwrYRzPIkamg/exec";
 
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
@@ -14,7 +13,6 @@ let stickersState = {};
 let stickersRepeatedState = {};
 let currentFilter = 'all';
 let currentPage = 1;
-let isAdmin = false;
 
 const SECTIONS_DATA = [
     { id: "FWC", name: "História da Copa", count: 20, prefix: "FWC", group: "especial" },
@@ -126,7 +124,6 @@ function generateStickersDatabase() {
 window.addEventListener('DOMContentLoaded', async () => {
     generateStickersDatabase();
     initCountdowns(); 
-    checkLoginState();
     await loadDatabaseFromSheets();
 });
 
@@ -161,32 +158,6 @@ async function loadDatabaseFromSheets() {
 
     updateDashboard();
     renderAlbum();
-}
-
-// --- ENVIO DINÂMICO DE ATUALIZAÇÕES PARA A PLANILHA ---
-async function syncStickerToSheets(stickerId) {
-    if (!isAdmin) return;
-    
-    const sticker = stickersList.find(s => s.id === stickerId);
-    if (!sticker) return;
-
-    const payload = {
-        code: sticker.code,
-        owned: stickersState[stickerId],
-        repeated: stickersRepeatedState[stickerId] || 0
-    };
-
-    try {
-        // Envia via POST de forma assíncrona usando 'no-cors' para evitar bloqueios de redirecionamento do Script
-        fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors", 
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-    } catch (error) {
-        console.error("Erro ao sincronizar modificação com o Sheets:", error);
-    }
 }
 
 // --- LÓGICA DOS CONTADORES ---
@@ -310,24 +281,11 @@ function renderAlbum() {
         const repCount = stickersRepeatedState[sticker.id] || 0;
         const card = document.createElement('div');
 
-        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''} ${isAdmin ? 'cursor-pointer scale-100 hover:scale-105 border border-dashed border-red-500/40 z-10' : ''}`;
-
-        if (isAdmin) {
-            card.onclick = () => toggleSticker(sticker.id);
-        }
+        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''}`;
 
         let repeatedHTML = '';
         if (isOwned) {
-            if (isAdmin) {
-                repeatedHTML = `
-                    <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
-                    <div onclick="event.stopPropagation();" class="flex items-center justify-between bg-black/50 border border-slate-800 rounded p-0.5 mt-0.5 text-[10px]">
-                        <button onclick="changeRepeated(${sticker.id}, -1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">-</button>
-                        <span class="font-bold text-amber-400 font-mono">${repCount} rep</span>
-                        <button onclick="changeRepeated(${sticker.id}, 1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">+</button>
-                    </div>
-                `;
-            } else if (repCount > 0) {
+            if (repCount > 0) {
                 repeatedHTML = `
                     <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
                     <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-extrabold rounded py-0.5 mt-0.5 text-[9px] font-mono tracking-wide">
@@ -355,27 +313,6 @@ function renderAlbum() {
         `;
         grid.appendChild(card);
     });
-}
-
-function toggleSticker(id) {
-    if (!isAdmin) return;
-    stickersState[id] = !stickersState[id];
-    if (!stickersState[id]) {
-        stickersRepeatedState[id] = 0;
-    }
-    updateDashboard();
-    renderAlbum();
-    syncStickerToSheets(id);
-}
-
-function changeRepeated(id, amount) {
-    if (!isAdmin) return;
-    if (stickersRepeatedState[id] === undefined) stickersRepeatedState[id] = 0;
-    stickersRepeatedState[id] += amount;
-    if (stickersRepeatedState[id] < 0) stickersRepeatedState[id] = 0;
-    updateDashboard();
-    renderAlbum();
-    syncStickerToSheets(id);
 }
 
 function filterStickers(filter, event) {
@@ -426,20 +363,6 @@ function navigatePage(direction) {
     renderAlbum();
 }
 
-function checkLoginState() {
-    if (sessionStorage.getItem('copa2026_logged_in') === 'true') {
-        isAdmin = true;
-        if(document.getElementById('admin-badge')) document.getElementById('admin-badge').classList.remove('hidden');
-        if(document.getElementById('login-trigger-btn')) document.getElementById('login-trigger-btn').classList.add('hidden');
-        if(document.getElementById('admin-hint')) document.getElementById('admin-hint').classList.remove('hidden');
-    }
-}
-
-function logout() {
-    sessionStorage.removeItem('copa2026_logged_in');
-    location.reload();
-}
-
 function openModal(id) {
     const modal = document.getElementById(id);
     modal.classList.remove('hidden');
@@ -450,14 +373,4 @@ function closeModal(id) {
     const modal = document.getElementById(id);
     modal.classList.add('opacity-0');
     setTimeout(() => modal.classList.add('hidden'), 300);
-}
-
-function handleLogin(event) {
-    event.preventDefault();
-    if (document.getElementById('username').value === 'SGCB' && document.getElementById('password').value === 'SGcb#555') {
-        sessionStorage.setItem('copa2026_logged_in', 'true');
-        location.reload();
-    } else {
-        document.getElementById('login-error').classList.remove('hidden');
-    }
 }
