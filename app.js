@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÃO DA API DO GOOGLE APPS SCRIPT ---
-// Substitua o link abaixo pela "URL do app da Web" que você copiou no Passo 2
+// Substitua o link abaixo pela "URL do app da Web" que você copiou ao implantar o script do Apps Script
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1RDggPtYo-HPAr8xN60lWjZn45y1paO2xUmug29qBayyib9tpEoPw0XwrYRzPIkamg/exec";
 
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
@@ -132,16 +132,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // --- LEITURA REAL-TIME DO GOOGLE SHEETS ---
 async function loadDatabaseFromSheets() {
-    stickersState = {};
-    stickersRepeatedState = {};
-    
     stickersList.forEach(s => {
         stickersState[s.id] = false;
         stickersRepeatedState[s.id] = 0;
     });
 
-    if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("SUA_URL_DO_APPS_SCRIPT_AQUI")) {
-        console.warn("Aviso: URL do Apps Script não configurada.");
+    if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("exec") === false) {
+        console.warn("Aviso: URL do Apps Script não configurada ou inválida.");
         updateDashboard();
         renderAlbum();
         return;
@@ -180,10 +177,10 @@ async function syncStickerToSheets(stickerId) {
     };
 
     try {
-        // Envia de forma assíncrona em background para não travar a tela
+        // Envia via POST de forma assíncrona usando 'no-cors' para evitar bloqueios de redirecionamento do Script
         fetch(GOOGLE_APPS_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors", // Necessário para evitar bloqueios de CORS do Google Apps Script
+            mode: "no-cors", 
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
@@ -231,7 +228,7 @@ function updateDashboard() {
     const total = TOTAL_STICKERS;
     const owned = Object.values(stickersState).filter(v => v === true).length;
     const repeated = Object.values(stickersRepeatedState).reduce((acc, curr) => acc + (curr || 0), 0);
-    const pct = Math.round((owned / total) * 100);
+    const pct = Math.round((owned / total) * 100) || 0;
 
     if(document.getElementById('stats-owned')) document.getElementById('stats-owned').innerText = owned;
     if(document.getElementById('stats-repeated')) document.getElementById('stats-repeated').innerText = repeated;
@@ -368,7 +365,7 @@ function toggleSticker(id) {
     }
     updateDashboard();
     renderAlbum();
-    syncStickerToSheets(id); // Dispara sincronização com o sheets
+    syncStickerToSheets(id);
 }
 
 function changeRepeated(id, amount) {
@@ -378,7 +375,7 @@ function changeRepeated(id, amount) {
     if (stickersRepeatedState[id] < 0) stickersRepeatedState[id] = 0;
     updateDashboard();
     renderAlbum();
-    syncStickerToSheets(id); // Dispara sincronização com o sheets
+    syncStickerToSheets(id);
 }
 
 function filterStickers(filter, event) {
