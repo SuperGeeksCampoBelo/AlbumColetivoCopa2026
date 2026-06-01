@@ -1,13 +1,12 @@
+// --- CONFIGURAÇÃO DA PLANILHA DO GOOGLE ---
+// Cole aqui entre as aspas o link gerado na opção "Publicar na Web" (formato .csv)
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQp2S91n7rHhK_lDZmdPvBkYtVAWtmJfl7JUAJ00VX4HUIgjhsOQ29EwEjC8ScOWknPkdY7RX8_vg9X/pub?output=csv";
+
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
 const WORLD_CUP_DATE = new Date("June 11, 2026 00:00:00").getTime();
-const CAMPAIGN_END_DATE = new Date("August 03, 2026 23:59:59").getTime(); 
+const CAMPAIGN_END_DATE = new Date("August 01, 2026 23:59:59").getTime(); 
 
-// --- DADOS GLOBAIS DO ÁLBUM DA ESCOLA (FONTE DE VERDADE) ---
-// Quando você clicar no botão de exportar no painel, substitua as duas linhas abaixo pelo código gerado:
-const GLOBAL_OWNED_STICKERS = [1, 21, 161]; 
-const GLOBAL_REPEATED_STICKERS = {"161":2};
-
-const TOTAL_STICKERS = 994; // 20 FWC + (48 Seleções * 20) + 14 Coca-Cola
+const TOTAL_STICKERS = 994; 
 const ITEMS_PER_PAGE = 48;
 
 let stickersList = [];
@@ -15,9 +14,8 @@ let stickersState = {};
 let stickersRepeatedState = {};
 let currentFilter = 'all';
 let currentPage = 1;
-let isAdmin = false;
+let isAdmin = false; // Como o controle agora é no Sheets, a edição direta no site fica desativada
 
-// Mapeamento sequencial exato com a injeção oficial dos Grupos (A até L) extraídos do PDF
 const SECTIONS_DATA = [
     { id: "FWC", name: "História da Copa", count: 20, prefix: "FWC", group: "especial" },
     { id: "MEX", name: "México", count: 20, prefix: "MEX", group: "A" },
@@ -125,13 +123,64 @@ function generateStickersDatabase() {
     });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     generateStickersDatabase();
-    initGlobalState();
-    checkLoginState();
     initCountdowns(); 
-    renderAlbum();
+    checkLoginState();
+    // Carrega os dados da planilha antes de renderizar a interface na tela
+    await loadGoogleSheetsData();
 });
+
+// --- SINCRO_MOTOR: BUSCA DE DADOS NO GOOGLE SHEETS ---
+async function loadGoogleSheetsData() {
+    // Estado fallback/limpo inicial
+    stickersState = {};
+    stickersRepeatedState = {};
+    stickersList.forEach(s => {
+        stickersState[s.id] = false;
+        stickersRepeatedState[s.id] = 0;
+    });
+
+    if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes("SUA_URL_DO_GOOGLE_SHEETS_AQUI")) {
+        console.warn("Aviso: URL do Google Sheets não configurada no app.js.");
+        updateDashboard();
+        renderAlbum();
+        return;
+    }
+
+    try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        const csvText = await response.text();
+        
+        // Divide o documento por quebras de linha
+        const lines = csvText.split(/\r?\n/);
+        
+        // Começa em 1 para pular os cabeçalhos da primeira linha
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            // Divide aceitando tanto vírgula quanto ponto e vírgula (padrão regional brasileiro)
+            const columns = lines[i].split(/[,;]/);
+            if (columns.length < 3) continue;
+
+            const codeFromSheet = columns[0].trim().toUpperCase();
+            const isOwned = columns[1].trim().toUpperCase() === "TRUE";
+            const repeatedCount = parseInt(columns[2].trim(), 10) || 0;
+
+            // Mapeia os dados da planilha com o ID interno do sistema baseado no código único
+            const matchedSticker = stickersList.find(s => s.code.toUpperCase() === codeFromSheet);
+            if (matchedSticker) {
+                stickersState[matchedSticker.id] = isOwned;
+                stickersRepeatedState[matchedSticker.id] = repeatedCount;
+            }
+        }
+    } catch (error) {
+        console.error("Falha técnica ao tentar consumir a planilha do Google Sheets:", error);
+    }
+
+    updateDashboard();
+    renderAlbum();
+}
 
 // --- LÓGICA DOS CONTADORES ---
 function initCountdowns() {
@@ -141,7 +190,6 @@ function initCountdowns() {
 
 function updateCountdowns() {
     const now = new Date().getTime();
-
     const wcDistance = WORLD_CUP_DATE - now;
     renderTimer('wc', wcDistance);
 
@@ -167,35 +215,6 @@ function renderTimer(prefix, distance) {
     document.getElementById(`${prefix}-hours`).innerText = String(hours).padStart(2, '0');
     document.getElementById(`${prefix}-mins`).innerText = String(minutes).padStart(2, '0');
     document.getElementById(`${prefix}-secs`).innerText = String(seconds).padStart(2, '0');
-}
-
-function initGlobalState() {
-    stickersState = {};
-    stickersRepeatedState = {};
-    
-    // Reseta o estado local estrutural baseado no tamanho do álbum
-    stickersList.forEach(s => {
-        stickersState[s.id] = false;
-        stickersRepeatedState[s.id] = 0;
-    });
-
-    // Injeta os dados estáticos declarados nas constantes de topo
-    GLOBAL_OWNED_STICKERS.forEach(id => {
-        if(stickersState[id] !== undefined) stickersState[id] = true;
-    });
-
-    Object.keys(GLOBAL_REPEATED_STICKERS).forEach(id => {
-        if(stickersRepeatedState[id] !== undefined) {
-            stickersRepeatedState[id] = GLOBAL_REPEATED_STICKERS[id];
-        }
-    });
-
-    updateDashboard();
-}
-
-function saveState() {
-    // Atualiza os componentes gráficos em tempo de execução na máquina do administrador
-    updateDashboard();
 }
 
 function updateDashboard() {
@@ -284,24 +303,11 @@ function renderAlbum() {
         const repCount = stickersRepeatedState[sticker.id] || 0;
         const card = document.createElement('div');
 
-        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''} ${isAdmin ? 'cursor-pointer scale-100 hover:scale-105 z-10 border-red-500' : ''}`;
-
-        if (isAdmin) {
-            card.onclick = () => toggleSticker(sticker.id);
-        }
+        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''}`;
 
         let repeatedHTML = '';
         if (isOwned) {
-            if (isAdmin) {
-                repeatedHTML = `
-                    <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
-                    <div onclick="event.stopPropagation();" class="flex items-center justify-between bg-black/50 border border-slate-800 rounded p-0.5 mt-0.5 text-[10px]">
-                        <button onclick="changeRepeated(${sticker.id}, -1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">-</button>
-                        <span class="font-bold text-amber-400 font-mono">${repCount} rep</span>
-                        <button onclick="changeRepeated(${sticker.id}, 1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">+</button>
-                    </div>
-                `;
-            } else if (repCount > 0) {
+            if (repCount > 0) {
                 repeatedHTML = `
                     <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
                     <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-extrabold rounded py-0.5 mt-0.5 text-[9px] font-mono tracking-wide">
@@ -329,25 +335,6 @@ function renderAlbum() {
         `;
         grid.appendChild(card);
     });
-}
-
-function toggleSticker(id) {
-    if (!isAdmin) return;
-    stickersState[id] = !stickersState[id];
-    if (!stickersState[id]) {
-        stickersRepeatedState[id] = 0;
-    }
-    saveState();
-    renderAlbum();
-}
-
-function changeRepeated(id, amount) {
-    if (!isAdmin) return;
-    if (stickersRepeatedState[id] === undefined) stickersRepeatedState[id] = 0;
-    stickersRepeatedState[id] += amount;
-    if (stickersRepeatedState[id] < 0) stickersRepeatedState[id] = 0;
-    saveState();
-    renderAlbum();
 }
 
 function filterStickers(filter, event) {
@@ -392,58 +379,18 @@ function navigatePage(direction) {
 
     if (direction === 'first') currentPage = 1;
     else if (direction === 'prev') { if (currentPage > 1) currentPage--; }
-    else if (direction === 'next') { if (currentPage < totalPages) currentPage++; }
+    else if (direction === 'next') { if (currentPage < totalPages) subgroup = currentPage++; }
     else if (direction === 'last') currentPage = totalPages;
 
     renderAlbum();
 }
 
 function checkLoginState() {
-    if (sessionStorage.getItem('copa2026_logged_in') === 'true') {
-        isAdmin = true;
-        document.getElementById('admin-badge').classList.remove('hidden');
-        document.getElementById('login-trigger-btn').classList.add('hidden');
-        document.getElementById('admin-hint').classList.remove('hidden');
-
-        // Injeção dinâmica do botão de exportação estrutural para o ecossistema do GitHub Pages
-        if (!document.getElementById('btn-export-github')) {
-            const hintDiv = document.getElementById('admin-hint');
-            const containerBtn = document.createElement('div');
-            containerBtn.className = "mt-3";
-            containerBtn.innerHTML = `
-                <button id="btn-export-github" onclick="exportGitHubData()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2 px-5 rounded-xl text-xs uppercase tracking-wider cursor-pointer transition shadow-lg">
-                    📦 Gerar Código para Atualizar o GitHub
-                </button>
-            `;
-            hintDiv.appendChild(containerBtn);
-        }
-    }
-}
-
-function exportGitHubData() {
-    const ownedIds = [];
-    const repeatedMap = {};
-
-    stickersList.forEach(s => {
-        if (stickersState[s.id]) {
-            ownedIds.push(s.id);
-        }
-        if ((stickersRepeatedState[s.id] || 0) > 0) {
-            repeatedMap[s.id] = stickersRepeatedState[s.id];
-        }
-    });
-
-    const generatedCode = `const GLOBAL_OWNED_STICKERS = ${JSON.stringify(ownedIds)};\nconst GLOBAL_REPEATED_STICKERS = ${JSON.stringify(repeatedMap)};`;
-    
-    navigator.clipboard.writeText(generatedCode).then(() => {
-        alert("Sucesso! As novas linhas de dados foram copiadas para sua Área de Transferência.\n\nAgora vá no seu arquivo 'app.js', substitua as linhas 7 e 8 por esse bloco copiado e faça o commit para o GitHub!");
-    }).catch(() => {
-        alert("Não foi possível copiar automaticamente. Copie o código abaixo manualmente:\n\n" + generatedCode);
-    });
+    // Mantido por compatibilidade com elementos do index.html antigos
+    // Como os dados vêm do Sheets, o login do site tornou-se desnecessário.
 }
 
 function logout() {
-    sessionStorage.removeItem('copa2026_logged_in');
     location.reload();
 }
 
@@ -461,10 +408,4 @@ function closeModal(id) {
 
 function handleLogin(event) {
     event.preventDefault();
-    if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'copa2026') {
-        sessionStorage.setItem('copa2026_logged_in', 'true');
-        location.reload();
-    } else {
-        document.getElementById('login-error').classList.remove('hidden');
-    }
 }
