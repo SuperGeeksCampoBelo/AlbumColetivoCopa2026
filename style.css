@@ -16,7 +16,6 @@ body {
     -moz-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    -white-text-fill-color: transparent;
     color: transparent;
     display: inline-block;
 }
