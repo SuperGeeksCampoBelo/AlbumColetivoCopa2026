@@ -57,14 +57,6 @@
                     <button onclick="openModal('regras-modal')" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-[#ff1e56] text-slate-300 hover:text-white font-bold rounded-xl transition text-[10px] md:text-xs cursor-pointer whitespace-nowrap h-9 flex items-center justify-center px-2">
                         📜 Regras
                     </button>
-                    <div class="flex-1">
-                        <div id="admin-badge" class="hidden bg-red-950/40 border border-red-500 text-red-400 rounded-xl text-[10px] md:text-xs font-bold flex items-center justify-center h-9 w-full">
-                            <button onclick="logout()" class="text-white hover:text-red-400 underline cursor-pointer">Sair</button>
-                        </div>
-                        <button id="login-trigger-btn" onclick="openModal('login-modal')" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-[#ff1e56] text-white font-bold rounded-xl transition text-[10px] md:text-xs cursor-pointer whitespace-nowrap h-9 flex items-center justify-center">
-                            🔑 Login
-                        </button>
-                    </div>
                 </div>
 
                 <div class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4">
@@ -202,10 +194,6 @@
     </section>
 
     <main class="max-w-7xl mx-auto w-full px-4 my-6 flex-grow">
-        <div id="admin-hint" class="hidden bg-red-950/20 border border-red-500 text-red-300 px-4 py-3 rounded-xl text-xs font-semibold mb-4 text-center">
-            💡 <strong>Modo Administrador Ativado:</strong> Clique no card para marcar/desmarcar posse. Use os botões internos de <span class="text-amber-400 font-bold">[-] [+]</span> para gerenciar as figurinhas repetidas de troca.
-        </div>
-
         <div id="album-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12 gap-2"></div>
 
         <div class="flex justify-center items-center gap-2 mt-8">
@@ -235,37 +223,11 @@
                     <li><strong class="text-white">Como Funciona:</strong> Cadastre suas figurinhas obtidas e controle suas repetidas através do painel.</li>
                     <li><strong class="text-white">Trocas na Unidade:</strong> Traga suas figurinhas repetidas físicas para a <span class="text-[#ff1e56] font-semibold">Unidade Campo Belo</span> para interagir, negociar com outros alunos e acelerar sua coleção.</li>
                     <li><strong class="text-white">Controle de Inventário:</strong> Mantenha seu painel atualizado. O gráfico de progresso reflete em tempo real a proximidade de completar as 994 figurinhas.</li>
-                    <li><strong class="text-white">Modo Edição:</strong> Apenas administradores autorizados da unidade possuem a credencial para ativar o gerenciamento manual direto na interface.</li>
                 </ul>
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] text-center text-slate-500">
                     Dúvidas sobre o projeto? Procure a coordenação ou a secretaria da Unidade Campo Belo.
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300">
-            <div class="bg-gradient-to-r from-[#ff1e56] to-[#80001c] p-4 flex justify-between items-center text-white">
-                <h3 class="font-copa text-sm uppercase tracking-tight">Painel do Proprietário</h3>
-                <button onclick="closeModal('login-modal')" class="font-bold text-xl hover:text-white cursor-pointer">&times;</button>
-            </div>
-            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Usuário</label>
-                    <input type="text" id="username" required placeholder="login" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff1e56]">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Senha</label>
-                    <input type="password" id="password" required placeholder="senha" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff1e56]">
-                </div>
-                <div id="login-error" class="hidden text-xs text-red-400 font-semibold bg-red-950/50 p-2 rounded-lg border border-red-900">
-                    ❌ Usuário ou senha incorretos!
-                </div>
-                <button type="submit" class="w-full bg-[#ff1e56] text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider hover:brightness-110 transition cursor-pointer">
-                    Liberar Edição
-                </button>
-            </form>
         </div>
     </div>
 
