@@ -1,6 +1,6 @@
-// --- CONFIGURAÇÃO DA PLANILHA DO GOOGLE ---
-// Cole aqui entre as aspas o link gerado na opção "Publicar na Web" (formato .csv)
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQp2S91n7rHhK_lDZmdPvBkYtVAWtmJfl7JUAJ00VX4HUIgjhsOQ29EwEjC8ScOWknPkdY7RX8_vg9X/pub?output=csv";
+// --- CONFIGURAÇÃO DA API DO GOOGLE APPS SCRIPT ---
+// Substitua o link abaixo pela "URL do app da Web" que você copiou no Passo 2
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1RDggPtYo-HPAr8xN60lWjZn45y1paO2xUmug29qBayyib9tpEoPw0XwrYRzPIkamg/exec";
 
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
 const WORLD_CUP_DATE = new Date("June 11, 2026 00:00:00").getTime();
@@ -14,7 +14,7 @@ let stickersState = {};
 let stickersRepeatedState = {};
 let currentFilter = 'all';
 let currentPage = 1;
-let isAdmin = false; // Como o controle agora é no Sheets, a edição direta no site fica desativada
+let isAdmin = false;
 
 const SECTIONS_DATA = [
     { id: "FWC", name: "História da Copa", count: 20, prefix: "FWC", group: "especial" },
@@ -127,59 +127,69 @@ window.addEventListener('DOMContentLoaded', async () => {
     generateStickersDatabase();
     initCountdowns(); 
     checkLoginState();
-    // Carrega os dados da planilha antes de renderizar a interface na tela
-    await loadGoogleSheetsData();
+    await loadDatabaseFromSheets();
 });
 
-// --- SINCRO_MOTOR: BUSCA DE DADOS NO GOOGLE SHEETS ---
-async function loadGoogleSheetsData() {
-    // Estado fallback/limpo inicial
+// --- LEITURA REAL-TIME DO GOOGLE SHEETS ---
+async function loadDatabaseFromSheets() {
     stickersState = {};
     stickersRepeatedState = {};
+    
     stickersList.forEach(s => {
         stickersState[s.id] = false;
         stickersRepeatedState[s.id] = 0;
     });
 
-    if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes("SUA_URL_DO_GOOGLE_SHEETS_AQUI")) {
-        console.warn("Aviso: URL do Google Sheets não configurada no app.js.");
+    if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes("SUA_URL_DO_APPS_SCRIPT_AQUI")) {
+        console.warn("Aviso: URL do Apps Script não configurada.");
         updateDashboard();
         renderAlbum();
         return;
     }
 
     try {
-        const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        const csvText = await response.text();
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL);
+        const data = await response.json();
         
-        // Divide o documento por quebras de linha
-        const lines = csvText.split(/\r?\n/);
-        
-        // Começa em 1 para pular os cabeçalhos da primeira linha
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
-            
-            // Divide aceitando tanto vírgula quanto ponto e vírgula (padrão regional brasileiro)
-            const columns = lines[i].split(/[,;]/);
-            if (columns.length < 3) continue;
-
-            const codeFromSheet = columns[0].trim().toUpperCase();
-            const isOwned = columns[1].trim().toUpperCase() === "TRUE";
-            const repeatedCount = parseInt(columns[2].trim(), 10) || 0;
-
-            // Mapeia os dados da planilha com o ID interno do sistema baseado no código único
-            const matchedSticker = stickersList.find(s => s.code.toUpperCase() === codeFromSheet);
-            if (matchedSticker) {
-                stickersState[matchedSticker.id] = isOwned;
-                stickersRepeatedState[matchedSticker.id] = repeatedCount;
+        data.forEach(item => {
+            const matched = stickersList.find(s => s.code.toUpperCase() === item.code.toUpperCase());
+            if (matched) {
+                stickersState[matched.id] = item.owned;
+                stickersRepeatedState[matched.id] = item.repeated;
             }
-        }
+        });
     } catch (error) {
-        console.error("Falha técnica ao tentar consumir a planilha do Google Sheets:", error);
+        console.error("Erro ao carregar dados do Google Sheets:", error);
     }
 
     updateDashboard();
     renderAlbum();
+}
+
+// --- ENVIO DINÂMICO DE ATUALIZAÇÕES PARA A PLANILHA ---
+async function syncStickerToSheets(stickerId) {
+    if (!isAdmin) return;
+    
+    const sticker = stickersList.find(s => s.id === stickerId);
+    if (!sticker) return;
+
+    const payload = {
+        code: sticker.code,
+        owned: stickersState[stickerId],
+        repeated: stickersRepeatedState[stickerId] || 0
+    };
+
+    try {
+        // Envia de forma assíncrona em background para não travar a tela
+        fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Necessário para evitar bloqueios de CORS do Google Apps Script
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        console.error("Erro ao sincronizar modificação com o Sheets:", error);
+    }
 }
 
 // --- LÓGICA DOS CONTADORES ---
@@ -223,10 +233,10 @@ function updateDashboard() {
     const repeated = Object.values(stickersRepeatedState).reduce((acc, curr) => acc + (curr || 0), 0);
     const pct = Math.round((owned / total) * 100);
 
-    document.getElementById('stats-owned').innerText = owned;
-    document.getElementById('stats-repeated').innerText = repeated;
-    document.getElementById('progress-percentage').innerText = `${pct}%`;
-    document.getElementById('progress-bar').style.width = `${pct}%`;
+    if(document.getElementById('stats-owned')) document.getElementById('stats-owned').innerText = owned;
+    if(document.getElementById('stats-repeated')) document.getElementById('stats-repeated').innerText = repeated;
+    if(document.getElementById('progress-percentage')) document.getElementById('progress-percentage').innerText = `${pct}%`;
+    if(document.getElementById('progress-bar')) document.getElementById('progress-bar').style.width = `${pct}%`;
 }
 
 function handleSearch() {
@@ -303,11 +313,24 @@ function renderAlbum() {
         const repCount = stickersRepeatedState[sticker.id] || 0;
         const card = document.createElement('div');
 
-        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''}`;
+        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''} ${isAdmin ? 'cursor-pointer scale-100 hover:scale-105 border border-dashed border-red-500/40 z-10' : ''}`;
+
+        if (isAdmin) {
+            card.onclick = () => toggleSticker(sticker.id);
+        }
 
         let repeatedHTML = '';
         if (isOwned) {
-            if (repCount > 0) {
+            if (isAdmin) {
+                repeatedHTML = `
+                    <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
+                    <div onclick="event.stopPropagation();" class="flex items-center justify-between bg-black/50 border border-slate-800 rounded p-0.5 mt-0.5 text-[10px]">
+                        <button onclick="changeRepeated(${sticker.id}, -1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">-</button>
+                        <span class="font-bold text-amber-400 font-mono">${repCount} rep</span>
+                        <button onclick="changeRepeated(${sticker.id}, 1)" class="px-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white font-bold rounded cursor-pointer transition text-[9px]">+</button>
+                    </div>
+                `;
+            } else if (repCount > 0) {
                 repeatedHTML = `
                     <div class="text-[8px] font-bold text-[#ff1e56] mt-1">✓ OBTIDO</div>
                     <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-extrabold rounded py-0.5 mt-0.5 text-[9px] font-mono tracking-wide">
@@ -335,6 +358,27 @@ function renderAlbum() {
         `;
         grid.appendChild(card);
     });
+}
+
+function toggleSticker(id) {
+    if (!isAdmin) return;
+    stickersState[id] = !stickersState[id];
+    if (!stickersState[id]) {
+        stickersRepeatedState[id] = 0;
+    }
+    updateDashboard();
+    renderAlbum();
+    syncStickerToSheets(id); // Dispara sincronização com o sheets
+}
+
+function changeRepeated(id, amount) {
+    if (!isAdmin) return;
+    if (stickersRepeatedState[id] === undefined) stickersRepeatedState[id] = 0;
+    stickersRepeatedState[id] += amount;
+    if (stickersRepeatedState[id] < 0) stickersRepeatedState[id] = 0;
+    updateDashboard();
+    renderAlbum();
+    syncStickerToSheets(id); // Dispara sincronização com o sheets
 }
 
 function filterStickers(filter, event) {
@@ -379,18 +423,23 @@ function navigatePage(direction) {
 
     if (direction === 'first') currentPage = 1;
     else if (direction === 'prev') { if (currentPage > 1) currentPage--; }
-    else if (direction === 'next') { if (currentPage < totalPages) subgroup = currentPage++; }
+    else if (direction === 'next') { if (currentPage < totalPages) currentPage++; }
     else if (direction === 'last') currentPage = totalPages;
 
     renderAlbum();
 }
 
 function checkLoginState() {
-    // Mantido por compatibilidade com elementos do index.html antigos
-    // Como os dados vêm do Sheets, o login do site tornou-se desnecessário.
+    if (sessionStorage.getItem('copa2026_logged_in') === 'true') {
+        isAdmin = true;
+        if(document.getElementById('admin-badge')) document.getElementById('admin-badge').classList.remove('hidden');
+        if(document.getElementById('login-trigger-btn')) document.getElementById('login-trigger-btn').classList.add('hidden');
+        if(document.getElementById('admin-hint')) document.getElementById('admin-hint').classList.remove('hidden');
+    }
 }
 
 function logout() {
+    sessionStorage.removeItem('copa2026_logged_in');
     location.reload();
 }
 
@@ -408,4 +457,10 @@ function closeModal(id) {
 
 function handleLogin(event) {
     event.preventDefault();
+    if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'copa2026') {
+        sessionStorage.setItem('copa2026_logged_in', 'true');
+        location.reload();
+    } else {
+        document.getElementById('login-error').classList.remove('hidden');
+    }
 }
