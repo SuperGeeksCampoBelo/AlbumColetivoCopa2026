@@ -383,14 +383,18 @@ function closeModal(id) {
     const favicon = document.getElementById('favicon');
     if (!favicon) return;
 
-    // Estado 1: Bolinha Vermelha Neon acesa
+    // Estado 1: Bolinha Vermelha Neon (Acesa)
     const iconOn = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ff1e56'/></svg>";
     
-    // Estado 2: Bolinha Transparente (apagada)
+    // Estado 2: Bolinha Transparente (Apagada)
     const iconOff = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='transparent'/></svg>";
 
-    // Alterna entre os dois estados a cada 1000ms (1 segundo)
+    // Variável de controle: começa como true (aceso)
+    let bolarAcesa = true;
+
+    // Alterna o estado a cada 1000ms (1 segundo)
     setInterval(() => {
-        favicon.href = favicon.href === iconOn ? iconOff : iconOn;
+        bolarAcesa = !bolarAcesa; // Inverte o estado (se está aceso, apaga; se está apagado, acende)
+        favicon.setAttribute('href', bolarAcesa ? iconOn : iconOff);
     }, 1000);
 })();
