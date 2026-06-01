@@ -279,7 +279,10 @@ function renderAlbum() {
         const repCount = stickersRepeatedState[sticker.id] || 0;
         const card = document.createElement('div');
 
-        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${sticker.special ? 'sticker-special' : ''}`;
+        // CORREÇÃO AQUI: Aplica 'sticker-special' no bloco apenas se ela NÃO for obtida
+        const specialClass = (sticker.special && !isOwned) ? 'sticker-special' : '';
+
+        card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${specialClass}`;
 
         let repeatedHTML = '';
         if (isOwned) {
