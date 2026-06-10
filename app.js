@@ -2,7 +2,7 @@
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1RDggPtYo-HPAr8xN60lWjZn45y1paO2xUmug29qBayyib9tpEoPw0XwrYRzPIkamg/exec";
 
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
-const WORLD_CUP_DATE = new Date("June 11, 2026 00:00:00").getTime();
+const WORLD_CUP_DATE = new Date("June 11, 2026 16:00:00").getTime();
 const CAMPAIGN_END_DATE = new Date("August 01, 2026 23:59:59").getTime(); 
 
 const TOTAL_STICKERS = 994; 
