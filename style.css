@@ -40,10 +40,12 @@ body {
         transform: translate(0, 0) scale(1);
         opacity: 0.5;
     }
+
     50% {
         transform: translate(6vw, 4vh) scale(1.25);
         opacity: 0.9;
     }
+
     100% {
         transform: translate(-3vw, 10vh) scale(0.95);
         opacity: 0.4;
@@ -55,10 +57,12 @@ body {
         transform: translate(0, 0) scale(1);
         opacity: 0.6;
     }
+
     50% {
         transform: translate(-8vw, -6vh) scale(0.85);
         opacity: 0.3;
     }
+
     100% {
         transform: translate(4vw, -3vh) scale(1.2);
         opacity: 0.95;
@@ -82,9 +86,11 @@ body {
     0% {
         transform: translate(0, 0) scale(1);
     }
+
     50% {
         transform: translate(40px, 25px) scale(1.02);
     }
+
     100% {
         transform: translate(-20px, 40px) scale(1);
     }
@@ -116,4 +122,24 @@ body {
 .sticker-missing.sticker-special {
     border: 1px solid rgba(245, 158, 11, 0.35) !important;
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
+/* --- EFEITO DE CONFETES COPA 2026 --- */
+.confetti {
+    position: fixed;
+    top: -20px;
+    z-index: 100;
+    pointer-events: none;
+    border-radius: 3px;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    100% {
+        transform: translateY(105vh) rotate(720deg);
+    }
 }
