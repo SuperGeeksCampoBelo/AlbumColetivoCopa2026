@@ -3,9 +3,9 @@ const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1RDgg
 
 // --- CONFIGURAÇÕES DE DATAS PARA OS CONTADORES ---
 const WORLD_CUP_DATE = new Date("June 11, 2026 16:00:00").getTime();
-const CAMPAIGN_END_DATE = new Date("August 01, 2026 23:59:59").getTime(); 
+const CAMPAIGN_END_DATE = new Date("August 01, 2026 23:59:59").getTime();
 
-const TOTAL_STICKERS = 994; 
+const TOTAL_STICKERS = 994;
 const ITEMS_PER_PAGE = 48;
 
 let stickersList = [];
@@ -13,6 +13,9 @@ let stickersState = {};
 let stickersRepeatedState = {};
 let currentFilter = 'all';
 let currentPage = 1;
+
+let confettiInterval = null;     // Controle do loop de confetes
+let isAutoConfettiActive = false; // Garante que o efeito automático ligue/desligue apenas uma vez
 
 const SECTIONS_DATA = [
     { id: "FWC", name: "História da Copa", count: 20, prefix: "FWC", group: "especial" },
@@ -43,7 +46,7 @@ const SECTIONS_DATA = [
     { id: "BEL", name: "Bélgica", count: 20, prefix: "BEL", group: "G" },
     { id: "EGY", name: "Egito", count: 20, prefix: "EGY", group: "G" },
     { id: "IRN", name: "Irã", count: 20, prefix: "IRN", group: "G" },
-    { id: "NZL", name: "Nova Zelândia", count: 20, prefix: "NZL", group: "G" },
+    { id: "NZL", name: "Nova Zelândia", transition: "NZL", group: "G" },
     { id: "ESP", name: "Espanha", count: 20, prefix: "ESP", group: "H" },
     { id: "CPV", name: "Cabo Verde", count: 20, prefix: "CPV", group: "H" },
     { id: "KSA", name: "Arábia Saudita", count: 20, prefix: "KSA", group: "H" },
@@ -76,10 +79,7 @@ function generateStickersDatabase() {
             let code = "";
             let name = "";
             let isSpecial = false;
-            
-            // LÓGICA DA SUÍÇA APLICADA A TODOS: 
-            // Todas as figurinhas agora usam estritamente o mesmo degradê sólido e limpo!
-            let bgGradient = "from-slate-900 to-slate-950"; 
+            let bgGradient = "from-slate-900 to-slate-950";
 
             if (sec.id === "FWC") {
                 if (j === 1) {
@@ -120,8 +120,18 @@ function generateStickersDatabase() {
 
 window.addEventListener('DOMContentLoaded', async () => {
     generateStickersDatabase();
-    initCountdowns(); 
+    initCountdowns();
     await loadDatabaseFromSheets();
+});
+
+// --- ATALHO DE TECLADO PARA A PRÉVIA ---
+window.addEventListener('keydown', (event) => {
+    if (document.activeElement === document.getElementById('search-input')) {
+        return;
+    }
+    if (event.key === 'p' || event.key === 'P') {
+        previewConfetti();
+    }
 });
 
 // --- LEITURA REAL-TIME DO GOOGLE SHEETS ---
@@ -141,7 +151,7 @@ async function loadDatabaseFromSheets() {
     try {
         const response = await fetch(GOOGLE_APPS_SCRIPT_URL);
         const data = await response.json();
-        
+
         data.forEach(item => {
             const matched = stickersList.find(s => s.code.toUpperCase() === item.code.toUpperCase());
             if (matched) {
@@ -159,13 +169,28 @@ async function loadDatabaseFromSheets() {
 
 // --- LÓGICA DOS CONTADORES ---
 function initCountdowns() {
-    updateCountdowns(); 
-    setInterval(updateCountdowns, 1000); 
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
 }
 
 function updateCountdowns() {
     const now = new Date().getTime();
     const wcDistance = WORLD_CUP_DATE - now;
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+    // Controle inteligente do efeito contínuo de 24 horas
+    if (wcDistance <= 0 && wcDistance > -ONE_DAY_MS) {
+        if (!isAutoConfettiActive) {
+            isAutoConfettiActive = true;
+            startConfetti();
+        }
+    } else {
+        if (isAutoConfettiActive) {
+            isAutoConfettiActive = false;
+            stopConfetti(); // Desliga exatamente ao acabar as 24h festivas
+        }
+    }
+
     renderTimer('wc', wcDistance);
 
     const campDistance = CAMPAIGN_END_DATE - now;
@@ -192,16 +217,72 @@ function renderTimer(prefix, distance) {
     document.getElementById(`${prefix}-secs`).innerText = String(seconds).padStart(2, '0');
 }
 
+// --- SISTEMA DA CHUVA DE CONFETES ---
+function startConfetti() {
+    if (confettiInterval) return;
+
+    const colors = ['#ff1e56', '#80001c', '#ffffff', '#f59e0b'];
+
+    confettiInterval = setInterval(() => {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        const size = Math.random() * 6 + 6;
+        const duration = Math.random() * 3 + 2;
+
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.width = `${size}px`;
+        confetti.style.height = `${size}px`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.opacity = Math.random() * 0.7 + 0.3;
+        confetti.style.animationDuration = `${duration}s`;
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+            confetti.remove();
+        }, duration * 1000);
+    }, 150);
+}
+
+function stopConfetti() {
+    if (confettiInterval) {
+        clearInterval(confettiInterval);
+        confettiInterval = null;
+    }
+}
+
+// --- DISPARADOR DE PRÉVIA (TECLA P) ---
+function previewConfetti() {
+    const now = new Date().getTime();
+    const wcDistance = WORLD_CUP_DATE - now;
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+    // TRAVA: Se estiver dentro do período automático de 24h, a prévia não faz nada
+    if (wcDistance <= 0 && wcDistance > -ONE_DAY_MS) {
+        return;
+    }
+
+    const alreadyRunning = !!confettiInterval;
+    startConfetti();
+
+    if (!alreadyRunning) {
+        setTimeout(() => {
+            stopConfetti();
+        }, 5000);
+    }
+}
+
 function updateDashboard() {
     const total = TOTAL_STICKERS;
     const owned = Object.values(stickersState).filter(v => v === true).length;
     const repeated = Object.values(stickersRepeatedState).reduce((acc, curr) => acc + (curr || 0), 0);
     const pct = Math.round((owned / total) * 100) || 0;
 
-    if(document.getElementById('stats-owned')) document.getElementById('stats-owned').innerText = owned;
-    if(document.getElementById('stats-repeated')) document.getElementById('stats-repeated').innerText = repeated;
-    if(document.getElementById('progress-percentage')) document.getElementById('progress-percentage').innerText = `${pct}%`;
-    if(document.getElementById('progress-bar')) document.getElementById('progress-bar').style.width = `${pct}%`;
+    if (document.getElementById('stats-owned')) document.getElementById('stats-owned').innerText = owned;
+    if (document.getElementById('stats-repeated')) document.getElementById('stats-repeated').innerText = repeated;
+    if (document.getElementById('progress-percentage')) document.getElementById('progress-percentage').innerText = `${pct}%`;
+    if (document.getElementById('progress-bar')) document.getElementById('progress-bar').style.width = `${pct}%`;
 }
 
 // --- PESQUISA E FILTROS ---
@@ -278,8 +359,6 @@ function renderAlbum() {
         const isOwned = stickersState[sticker.id];
         const repCount = stickersRepeatedState[sticker.id] || 0;
         const card = document.createElement('div');
-
-        // CORREÇÃO AQUI: Aplica 'sticker-special' no bloco apenas se ela NÃO for obtida
         const specialClass = (sticker.special && !isOwned) ? 'sticker-special' : '';
 
         card.className = `sticker-card relative rounded-lg p-2 flex flex-col justify-between aspect-[3/4] text-center select-none bg-gradient-to-br ${sticker.bg} ${isOwned ? 'sticker-owned' : 'sticker-missing'} ${specialClass}`;
@@ -316,6 +395,7 @@ function renderAlbum() {
     });
 }
 
+// --- FILTROS ---
 function filterStickers(filter, event) {
     currentFilter = filter;
     currentPage = 1;
@@ -333,6 +413,7 @@ function filterStickers(filter, event) {
     renderAlbum();
 }
 
+// --- NAVEGAÇÃO DE PÁGINAS ---
 function navigatePage(direction) {
     const groupFilter = document.getElementById('group-select').value;
     const categoryFilter = document.getElementById('category-select').value;
@@ -376,25 +457,18 @@ function closeModal(id) {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
-// ==========================================
-// EFEITO PISCANTE DO FAVICON (SINAL ONLINE)
-// ==========================================
-(function() {
+// --- FAVICON PISCANTE ---
+(function () {
     const favicon = document.getElementById('favicon');
     if (!favicon) return;
 
-    // Estado 1: Bolinha Vermelha Neon (Acesa)
     const iconOn = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23ff1e56'/></svg>";
-    
-    // Estado 2: Bolinha Transparente (Apagada)
     const iconOff = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='transparent'/></svg>";
 
-    // Variável de controle: começa como true (aceso)
     let bolarAcesa = true;
 
-    // Alterna o estado a cada 1000ms (1 segundo)
     setInterval(() => {
-        bolarAcesa = !bolarAcesa; // Inverte o estado (se está aceso, apaga; se está apagado, acende)
+        bolarAcesa = !bolarAcesa;
         favicon.setAttribute('href', bolarAcesa ? iconOn : iconOff);
     }, 1000);
 })();
